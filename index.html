@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IOE K1 ĐỀ SỐ 01 - LUYỆN THI TIẾNG ANH</title>
+    <!-- Dependencies -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+      body { 
+        font-family: 'Nunito', sans-serif; 
+        background-color: #f8fafc; 
+        margin: 0; 
+        overflow-x: hidden;
+      }
+      .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+      .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+      
+      @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+      .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+      
+      @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+      .animate-slide-up { animation: slideUp 0.4s ease-out forwards; }
+
+      @keyframes bounce-short {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-4px); }
+      }
+      .animate-bounce-short { animation: bounce-short 1s ease-in-out infinite; }
+
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+      }
+      .animate-shake { animation: shake 0.2s ease-in-out 0s 2; }
+      
+      .bubble {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        animation: float 20s infinite linear;
+        z-index: 0;
+      }
+      @keyframes float {
+        0% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+        100% { transform: translateY(-1000px) rotate(720deg); opacity: 0; }
+      }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/"
+  }
+}
+</script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo } = React;
+
+        // --- DỮ LIỆU 100 CÂU HỎI ---
+        const QUIZ_DATA = [
+            { id: 1, type: 'REARRANGE', questionText: "Sắp xếp thành từ đúng: CON VỊT", rearrangeParts: ["D", "U", "C", "K"], correctAnswer: "DUCK", imageUrl: "https://images.unsplash.com/photo-1555854817-2b226f1a4bb4?w=400", explanation: "Duck nghĩa là con vịt.", hint: "Con này kêu 'Quạc Quạc' và thích bơi hồ. Chữ đầu là D nhé!" },
+            { id: 2, type: 'MULTIPLE_CHOICE', questionText: "Chọn từ có chứa chữ cái 'A':", options: ["bike", "river", "sand", "ride"], correctAnswer: "sand", imageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400", explanation: "Trong từ 'sand' (cát) có chứa chữ 'a'.", hint: "Bé hay dùng nó để xây lâu đài ở bãi biển." },
+            { id: 3, type: 'REARRANGE', questionText: "Sắp xếp thành từ đúng: CÁI BÀN HỌC", rearrangeParts: ["D", "E", "S", "K"], correctAnswer: "DESK", imageUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400", explanation: "Desk nghĩa là cái bàn học.", hint: "Vật dụng bé dùng ngồi học bài mỗi tối." },
+            { id: 4, type: 'REARRANGE', questionText: "Sắp xếp thành từ đúng: CÁI TÁCH/CHÉN", rearrangeParts: ["C", "U", "P"], correctAnswer: "CUP", imageUrl: "https://images.unsplash.com/photo-1577931957312-0975b9278964?w=400", explanation: "Cup nghĩa là cái tách uống nước.", hint: "Từ này chỉ có 3 chữ cái thôi, bắt đầu bằng C." },
+            { id: 5, type: 'MULTIPLE_CHOICE', questionText: "Chọn từ đúng cho: CẦU VỒNG", options: ["Rainbow", "Sun", "Cloud", "Rain"], correctAnswer: "Rainbow", imageUrl: "https://images.unsplash.com/photo-1444491741275-3747c53c99b4?w=400", explanation: "Rainbow nghĩa là cầu vồng.", hint: "Nó có 7 màu và xuất hiện sau cơn mưa." },
+            { id: 6, type: 'REARRANGE', questionText: "Nghe và sắp xếp: SINH NHẬT", rearrangeParts: ["B", "I", "R", "T", "H", "D", "A", "Y"], correctAnswer: "BIRTHDAY", imageUrl: "https://images.unsplash.com/photo-1533276395701-c274ca090185?w=400", explanation: "Birthday nghĩa là ngày sinh nhật.", hint: "Bắt đầu bằng chữ B, ngày bé có bánh kem và quà." },
+            { id: 7, type: 'MULTIPLE_CHOICE', questionText: "Chọn từ có chứa chữ cái 'C':", options: ["write", "hi", "dog", "cat"], correctAnswer: "cat", imageUrl: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400", explanation: "Từ 'cat' (con mèo) bắt đầu bằng chữ 'c'.", hint: "Con vật này kêu 'Meo Meo'." },
+            { id: 8, type: 'FILL_IN_BLANK', questionText: "Điền từ: Let's look at the s_ _ . (Bầu trời)", correctAnswer: "sky", imageUrl: "https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?w=400", explanation: "Sky nghĩa là bầu trời.", hint: "Bé nhìn lên cao, nơi có mây trôi." },
+            { id: 9, type: 'FILL_IN_BLANK', questionText: "Đếm số lượng con mèo trong hình:", correctAnswer: "four", imageUrl: "https://images.unsplash.com/photo-1513245543132-31f507417b26?w=400", explanation: "Số 4 là 'four'.", hint: "Đếm: One, Two, Three...?" },
+            { id: 10, type: 'REARRANGE', questionText: "Sắp xếp thành từ: CHÓ CON", rearrangeParts: ["P", "U", "P", "P", "Y"], correctAnswer: "PUPPY", imageUrl: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400", explanation: "Puppy nghĩa là chó con.", hint: "Bắt đầu bằng chữ P, có 2 chữ P ở giữa." },
+            { id: 11, type: 'REARRANGE', questionText: "Sắp xếp: SỐ 14", rearrangeParts: ["F", "O", "U", "R", "T", "E", "E", "N"], correctAnswer: "FOURTEEN", imageUrl: "https://images.unsplash.com/photo-1502139214982-d0ad755818d8?w=400", explanation: "Fourteen là 14.", hint: "Số 4 (Four) thêm đuôi 'teen'." },
+            { id: 12, type: 'REARRANGE', questionText: "Sắp xếp: SỐ 10", rearrangeParts: ["T", "E", "N"], correctAnswer: "TEN", imageUrl: "https://images.unsplash.com/photo-1599508704512-2f19fe912053?w=400", explanation: "Ten là 10.", hint: "Bắt đầu bằng chữ T." },
+            { id: 13, type: 'REARRANGE', questionText: "Sắp xếp: SỐ 19", rearrangeParts: ["N", "I", "N", "E", "T", "E", "E", "N"], correctAnswer: "NINETEEN", imageUrl: "https://images.unsplash.com/photo-1534351590666-13e3e96b5017?w=400", explanation: "Nineteen là 19.", hint: "Số 9 (Nine) thêm đuôi 'teen'." },
+            { id: 14, type: 'FILL_IN_BLANK', questionText: "Đếm số con bò trong hình:", correctAnswer: "two", imageUrl: "https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?w=400", explanation: "Two là 2.", hint: "Đếm xem có mấy bạn bò." },
+            { id: 15, type: 'MULTIPLE_CHOICE', questionText: "Chọn hình đúng: KITE", options: ["Ball", "Kite", "Doll", "Car"], correctAnswer: "Kite", imageUrl: "https://images.unsplash.com/photo-1510137617477-8079ba75e927?w=400", explanation: "Kite là cái diều.", hint: "Vật này bay cao nhờ gió." },
+            { id: 16, type: 'REARRANGE', questionText: "Sắp xếp: CON CÁO", rearrangeParts: ["F", "O", "X"], correctAnswer: "FOX", imageUrl: "https://images.unsplash.com/photo-1516934024742-b461fba47600?w=400", explanation: "Fox là con cáo.", hint: "Kết thúc bằng chữ X." },
+            { id: 17, type: 'FILL_IN_BLANK', questionText: "Điền từ: It's a s_ _ _ _ day. (Nắng)", correctAnswer: "sunny", imageUrl: "https://images.unsplash.com/photo-1541119638723-c51cbe2262aa?w=400", explanation: "Sunny là trời nắng.", hint: "Bắt đầu bằng 'Sun'." },
+            { id: 18, type: 'REARRANGE', questionText: "Sắp xếp: CON ONG", rearrangeParts: ["B", "E", "E"], correctAnswer: "BEE", imageUrl: "https://images.unsplash.com/photo-1473116763249-2faaef81ccda?w=400", explanation: "Bee là con ong.", hint: "Chăm chỉ đi tìm mật." },
+            { id: 19, type: 'FILL_IN_BLANK', questionText: "Điền chữ: Q_ESTION (Câu hỏi)", correctAnswer: "U", imageUrl: "https://images.unsplash.com/photo-1516321497487-e288fb19713f?w=400", explanation: "Question là câu hỏi.", hint: "Sau chữ Q thường là chữ U." },
+            { id: 20, type: 'MULTIPLE_CHOICE', questionText: "Âm giống 'G' trong 'Goat':", options: ["Garden", "Giraffe", "George", "Giant"], correctAnswer: "Garden", imageUrl: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=400", explanation: "Garden (khu vườn) có âm /g/.", hint: "Nơi có nhiều hoa." },
+            { id: 21, type: 'MULTIPLE_CHOICE', questionText: "Số 1 tiếng Anh là gì?", options: ["One", "Two", "Three", "Four"], correctAnswer: "One", imageUrl: "https://images.unsplash.com/photo-1599508704512-2f19fe912053?w=400", explanation: "One là 1.", hint: "Số đầu tiên bé học." },
+            { id: 22, type: 'REARRANGE', questionText: "Sắp xếp: QUẢ TÁO", rearrangeParts: ["A", "P", "P", "L", "E"], correctAnswer: "APPLE", imageUrl: "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?w=400", explanation: "Apple là quả táo.", hint: "Quả tròn màu đỏ." },
+            { id: 23, type: 'FILL_IN_BLANK', questionText: "Điền từ: A red b_ _ . (Cái túi)", correctAnswer: "bag", imageUrl: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=400", explanation: "Bag là cái túi.", hint: "Bé dùng để đựng sách." },
+            { id: 24, type: 'REARRANGE', questionText: "Sắp xếp: CON KIẾN", rearrangeParts: ["A", "N", "T"], correctAnswer: "ANT", imageUrl: "https://images.unsplash.com/photo-1581333100576-b73bbe92c2cb?w=400", explanation: "Ant là con kiến.", hint: "Con vật rất nhỏ bé." },
+            { id: 25, type: 'MULTIPLE_CHOICE', questionText: "Màu đỏ là gì?", options: ["Red", "Blue", "Green", "Yellow"], correctAnswer: "Red", imageUrl: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=400", explanation: "Red là màu đỏ.", hint: "Màu của quả táo chín." },
+            { id: 26, type: 'FILL_IN_BLANK', questionText: "I can r_ _ . (Chạy)", correctAnswer: "run", imageUrl: "https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=400", explanation: "Run là chạy.", hint: "Di chuyển rất nhanh bằng chân." },
+            { id: 27, type: 'REARRANGE', questionText: "Sắp xếp: CON CÁ", rearrangeParts: ["F", "I", "S", "H"], correctAnswer: "FISH", imageUrl: "https://images.unsplash.com/photo-1524704659690-3f7a37d9ee26?w=400", explanation: "Fish là con cá.", hint: "Sống dưới nước." },
+            { id: 28, type: 'MULTIPLE_CHOICE', questionText: "Hình tròn là gì?", options: ["Square", "Circle", "Star", "Oval"], correctAnswer: "Circle", imageUrl: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=400", explanation: "Circle là hình tròn.", hint: "Giống như ông mặt trời." },
+            { id: 29, type: 'FILL_IN_BLANK', questionText: "A green t_ _ _ . (Cái cây)", correctAnswer: "tree", imageUrl: "https://images.unsplash.com/photo-1513836279014-a89f7076ae86?w=400", explanation: "Tree là cái cây.", hint: "Có lá xanh và bóng mát." },
+            { id: 30, type: 'REARRANGE', questionText: "Sắp xếp: Ô TÔ", rearrangeParts: ["C", "A", "R"], correctAnswer: "CAR", imageUrl: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=400", explanation: "Car là ô tô.", hint: "Phương tiện có 4 bánh." },
+            { id: 31, type: 'MULTIPLE_CHOICE', questionText: "Số 5 là gì?", options: ["Four", "Five", "Six", "Seven"], correctAnswer: "Five", imageUrl: "https://images.unsplash.com/photo-1599508704512-2f19fe912053?w=400", explanation: "Five là 5.", hint: "Bắt đầu bằng chữ F." },
+            { id: 32, type: 'FILL_IN_BLANK', questionText: "I like p_ _ _ _ . (Mỳ Ý)", correctAnswer: "pasta", imageUrl: "https://images.unsplash.com/photo-1473093226795-af9932fe5856?w=400", explanation: "Pasta là mỳ Ý.", hint: "Món mỳ sợi dài ngon miệng." },
+            { id: 33, type: 'REARRANGE', questionText: "Sắp xếp: CON CHIM", rearrangeParts: ["B", "I", "R", "D"], correctAnswer: "BIRD", imageUrl: "https://images.unsplash.com/photo-1444464666168-49d633b867ad?w=400", explanation: "Bird là con chim.", hint: "Có thể bay lượn trên trời." },
+            { id: 34, type: 'MULTIPLE_CHOICE', questionText: "Màu xanh dương là gì?", options: ["Red", "Blue", "Green", "White"], correctAnswer: "Blue", imageUrl: "https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?w=400", explanation: "Blue là xanh dương.", hint: "Màu của bầu trời." },
+            { id: 35, type: 'FILL_IN_BLANK', questionText: "A big b_ _ _ . (Quả bóng)", correctAnswer: "ball", imageUrl: "https://images.unsplash.com/photo-1589311145657-69b563f458e0?w=400", explanation: "Ball là quả bóng.", hint: "Bé dùng chân đá nó." },
+            { id: 36, type: 'REARRANGE', questionText: "Sắp xếp: MẸ", rearrangeParts: ["M", "O", "T", "H", "E", "R"], correctAnswer: "MOTHER", imageUrl: "https://images.unsplash.com/photo-1511895426328-dc8714191300?w=400", explanation: "Mother là mẹ.", hint: "Người phụ nữ yêu bé nhất." },
+            { id: 37, type: 'MULTIPLE_CHOICE', questionText: "Số 10 là gì?", options: ["Ten", "Two", "Zero", "One"], correctAnswer: "Ten", imageUrl: "https://images.unsplash.com/photo-1599508704512-2f19fe912053?w=400", explanation: "Ten là 10.", hint: "Bắt đầu bằng T." },
+            { id: 38, type: 'FILL_IN_BLANK', questionText: "Wash your h_ _ _ _ . (Tay)", correctAnswer: "hands", imageUrl: "https://images.unsplash.com/photo-1511895426328-dc8714191300?w=400", explanation: "Hands là đôi tay.", hint: "Bé cần rửa sạch trước khi ăn." },
+            { id: 39, type: 'REARRANGE', questionText: "Sắp xếp: CON LỢN", rearrangeParts: ["P", "I", "G"], correctAnswer: "PIG", imageUrl: "https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=400", explanation: "Pig là con lợn.", hint: "Con vật kêu ủn ỉn." },
+            { id: 40, type: 'MULTIPLE_CHOICE', questionText: "Quả chuối là gì?", options: ["Apple", "Orange", "Banana", "Pear"], correctAnswer: "Banana", imageUrl: "https://images.unsplash.com/photo-1528825876231-237a40386924?w=400", explanation: "Banana là chuối.", hint: "Quả dài màu vàng." },
+            // Thêm tiếp cho đủ 100 câu... (Lưu ý: Bạn có thể mở rộng danh sách này nếu muốn)
+            { id: 41, type: 'FILL_IN_BLANK', questionText: "I can s_ _ _ . (Hát)", correctAnswer: "sing", imageUrl: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=400", explanation: "Sing là hát.", hint: "Bé dùng giọng để tạo ra âm nhạc." },
+            { id: 42, type: 'REARRANGE', questionText: "Sắp xếp: NGÔI SAO", rearrangeParts: ["S", "T", "A", "R"], correctAnswer: "STAR", imageUrl: "https://images.unsplash.com/photo-1506318137071-a8e063b4b519?w=400", explanation: "Star là ngôi sao.", hint: "Lấp lánh trên trời đêm." },
+            { id: 43, type: 'MULTIPLE_CHOICE', questionText: "Số 2 là gì?", options: ["One", "Two", "Three", "Four"], correctAnswer: "Two", imageUrl: "https://images.unsplash.com/photo-1599508704512-2f19fe912053?w=400", explanation: "Two là 2.", hint: "Số ngón tay của dấu hòa bình." },
+            { id: 44, type: 'FILL_IN_BLANK', questionText: "A white e_ _ . (Quả trứng)", correctAnswer: "egg", imageUrl: "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=400", explanation: "Egg là quả trứng.", hint: "Con gà đẻ ra quả này." },
+            { id: 45, type: 'REARRANGE', questionText: "Sắp xếp: CÁI HỘP", rearrangeParts: ["B", "O", "X"], correctAnswer: "BOX", imageUrl: "https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=400", explanation: "Box là cái hộp.", hint: "B-O-X." },
+            { id: 46, type: 'MULTIPLE_CHOICE', questionText: "Con chó là gì?", options: ["Dog", "Cat", "Bird", "Pig"], correctAnswer: "Dog", imageUrl: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400", explanation: "Dog là con chó.", hint: "Kêu 'Gâu Gâu'." },
+            { id: 47, type: 'FILL_IN_BLANK', questionText: "Open the d_ _ _ . (Cái cửa)", correctAnswer: "door", imageUrl: "https://images.unsplash.com/photo-1534073737927-85f1ebff1f5d?w=400", explanation: "Door là cái cửa.", hint: "Để bé ra vào phòng." },
+            { id: 48, type: 'REARRANGE', questionText: "Sắp xếp: QUẢ CAM", rearrangeParts: ["O", "R", "A", "N", "G", "E"], correctAnswer: "ORANGE", imageUrl: "https://images.unsplash.com/photo-1547517023-7ca0c162f816?w=400", explanation: "Orange là quả cam.", hint: "Vừa là tên quả, vừa là tên màu." },
+            { id: 49, type: 'MULTIPLE_CHOICE', questionText: "Màu xanh lá là gì?", options: ["Red", "Blue", "Green", "Pink"], correctAnswer: "Green", imageUrl: "https://images.unsplash.com/photo-1513836279014-a89f7076ae86?w=400", explanation: "Green là màu xanh lá.", hint: "Màu của cây cỏ." },
+            { id: 50, type: 'FILL_IN_BLANK', questionText: "A cute r_ _ _ _ _ . (Con thỏ)", correctAnswer: "rabbit", imageUrl: "https://images.unsplash.com/photo-1585110396054-c8aa01c79781?w=400", explanation: "Rabbit là con thỏ.", hint: "Tai dài và thích ăn cà rốt." },
+            { id: 51, type: 'REARRANGE', questionText: "Sắp xếp: MÁY BAY", rearrangeParts: ["P", "L", "A", "N", "E"], correctAnswer: "PLANE", imageUrl: "https://images.unsplash.com/photo-1517976487492-5750f3195933?w=400", explanation: "Plane là máy bay.", hint: "Bay rất cao trên mây." },
+            { id: 52, type: 'MULTIPLE_CHOICE', questionText: "Số 7 là gì?", options: ["Six", "Seven", "Eight", "Nine"], correctAnswer: "Seven", imageUrl: "https://images.unsplash.com/photo-1599508704512-2f19fe912053?w=400", explanation: "Seven là 7.", hint: "Bắt đầu bằng chữ S." },
+            { id: 53, type: 'FILL_IN_BLANK', questionText: "I drink m_ _ _ . (Sữa)", correctAnswer: "milk", imageUrl: "https://images.unsplash.com/photo-1550583724-125581fe2f8a?w=400", explanation: "Milk là sữa.", hint: "Đồ uống màu trắng giúp bé khỏe mạnh." },
+            { id: 54, type: 'REARRANGE', questionText: "Sắp xếp: CON KHỈ", rearrangeParts: ["M", "O", "N", "K", "E", "Y"], correctAnswer: "MONKEY", imageUrl: "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?w=400", explanation: "Monkey là con khỉ.", hint: "Rất thích ăn chuối và leo trèo." },
+            { id: 55, type: 'MULTIPLE_CHOICE', questionText: "Cái mũ là gì?", options: ["Hat", "Shoes", "Shirt", "Socks"], correctAnswer: "Hat", imageUrl: "https://images.unsplash.com/photo-1521369909029-2afed882baee?w=400", explanation: "Hat là cái mũ.", hint: "Để bé đội lên đầu." },
+            { id: 56, type: 'FILL_IN_BLANK', questionText: "A small f_ _ _ . (Con ếch)", correctAnswer: "frog", imageUrl: "https://images.unsplash.com/photo-1559190394-df5a28aab5c5?w=400", explanation: "Frog là con ếch.", hint: "Nhảy lộp độp và kêu ộp ộp." },
+            { id: 57, type: 'REARRANGE', questionText: "Sắp xếp: Ô TÔ TẢI", rearrangeParts: ["T", "R", "U", "C", "K"], correctAnswer: "TRUCK", imageUrl: "https://images.unsplash.com/photo-1586191582056-a3674686cc93?w=400", explanation: "Truck là ô tô tải.", hint: "Xe chở nhiều hàng hóa." },
+            { id: 58, type: 'MULTIPLE_CHOICE', questionText: "Con gà là gì?", options: ["Chicken", "Cow", "Horse", "Sheep"], correctAnswer: "Chicken", imageUrl: "https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?w=400", explanation: "Chicken là con gà.", hint: "Kêu cục ta cục tác." },
+            { id: 59, type: 'FILL_IN_BLANK', questionText: "Look at my p_ _ . (Cái bút)", correctAnswer: "pen", imageUrl: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=400", explanation: "Pen là cái bút.", hint: "Dùng để viết bài." },
+            { id: 60, type: 'REARRANGE', questionText: "Sắp xếp: QUẢ LÊ", rearrangeParts: ["P", "E", "A", "R"], correctAnswer: "PEAR", imageUrl: "https://images.unsplash.com/photo-1514756331096-242f3900f84f?w=400", explanation: "Pear là quả lê.", hint: "Quả có hình giống cái chuông." },
+            { id: 61, type: 'MULTIPLE_CHOICE', questionText: "Màu vàng là gì?", options: ["Red", "Blue", "Green", "Yellow"], correctAnswer: "Yellow", imageUrl: "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=400", explanation: "Yellow là màu vàng.", hint: "Màu của hoa hướng dương." },
+            { id: 62, type: 'FILL_IN_BLANK', questionText: "A fast b_ _ _ . (Cái thuyền)", correctAnswer: "boat", imageUrl: "https://images.unsplash.com/photo-1544551763-47a0159f963f?w=400", explanation: "Boat là cái thuyền.", hint: "Đi trên mặt nước." },
+            { id: 63, type: 'REARRANGE', questionText: "Sắp xếp: SÁCH", rearrangeParts: ["B", "O", "O", "K"], correctAnswer: "BOOK", imageUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400", explanation: "Book là cuốn sách.", hint: "Có nhiều tranh và chữ." },
+            { id: 64, type: 'MULTIPLE_CHOICE', questionText: "Con bò là gì?", options: ["Cow", "Cat", "Dog", "Duck"], correctAnswer: "Cow", imageUrl: "https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?w=400", explanation: "Cow là con bò.", hint: "Cho chúng ta sữa uống." },
+            { id: 65, type: 'FILL_IN_BLANK', questionText: "Wash your f_ _ _ . (Khuôn mặt)", correctAnswer: "face", imageUrl: "https://images.unsplash.com/photo-1511895426328-dc8714191300?w=400", explanation: "Face là khuôn mặt.", hint: "Bé rửa mặt cho sạch xinh." },
+            { id: 66, type: 'REARRANGE', questionText: "Sắp xếp: GIA ĐÌNH", rearrangeParts: ["F", "A", "M", "I", "L", "Y"], correctAnswer: "FAMILY", imageUrl: "https://images.unsplash.com/photo-1511895426328-dc8714191300?w=400", explanation: "Family là gia đình.", hint: "Gồm bố, mẹ và bé." },
+            { id: 67, type: 'MULTIPLE_CHOICE', questionText: "Số 8 là gì?", options: ["Six", "Seven", "Eight", "Nine"], correctAnswer: "Eight", imageUrl: "https://images.unsplash.com/photo-1599508704512-2f19fe912053?w=400", explanation: "Eight là số 8.", hint: "Trông giống hai vòng tròn chồng lên nhau." },
+            { id: 68, type: 'FILL_IN_BLANK', questionText: "Eat your p_ _ _ _ . (Bánh Pizza)", correctAnswer: "pizza", imageUrl: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400", explanation: "Pizza là bánh Pizza.", hint: "Món bánh tròn có nhiều nhân." },
+            { id: 69, type: 'REARRANGE', questionText: "Sắp xếp: CÁI CỐC", rearrangeParts: ["G", "L", "A", "S", "S"], correctAnswer: "GLASS", imageUrl: "https://images.unsplash.com/photo-1577931957312-0975b9278964?w=400", explanation: "Glass là cái cốc thủy tinh.", hint: "Dùng để uống nước." },
+            { id: 70, type: 'MULTIPLE_CHOICE', questionText: "Bố là gì?", options: ["Father", "Mother", "Brother", "Sister"], correctAnswer: "Father", imageUrl: "https://images.unsplash.com/photo-1511895426328-dc8714191300?w=400", explanation: "Father là bố.", hint: "Người đàn ông trong gia đình." },
+            { id: 71, type: 'FILL_IN_BLANK', questionText: "A red r_ _ _ . (Hoa hồng)", correctAnswer: "rose", imageUrl: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=400", explanation: "Rose là hoa hồng.", hint: "Loài hoa rất đẹp và có hương thơm." },
+            { id: 72, type: 'REARRANGE', questionText: "Sắp xếp: MÀU HỒNG", rearrangeParts: ["P", "I", "N", "K"], correctAnswer: "PINK", imageUrl: "https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=400", explanation: "Pink là màu hồng.", hint: "Màu bé gái thường thích." },
+            { id: 73, type: 'MULTIPLE_CHOICE', questionText: "Số 3 là gì?", options: ["One", "Two", "Three", "Four"], correctAnswer: "Three", imageUrl: "https://images.unsplash.com/photo-1599508704512-2f19fe912053?w=400", explanation: "Three là số 3.", hint: "Bắt đầu bằng chữ T." },
+            { id: 74, type: 'FILL_IN_BLANK', questionText: "The s_ _ is blue.", correctAnswer: "sun", imageUrl: "https://images.unsplash.com/photo-1541119638723-c51cbe2262aa?w=400", explanation: "Sun là mặt trời.", hint: "Tỏa nắng ấm áp." },
+            { id: 75, type: 'REARRANGE', questionText: "Sắp xếp: CON RẮN", rearrangeParts: ["S", "N", "A", "K", "E"], correctAnswer: "SNAKE", imageUrl: "https://images.unsplash.com/photo-1528183429752-a97d0bf99b5a?w=400", explanation: "Snake là con rắn.", hint: "Thân dài và trườn trên đất." },
+            { id: 76, type: 'MULTIPLE_CHOICE', questionText: "Màu trắng là gì?", options: ["White", "Black", "Red", "Grey"], correctAnswer: "White", imageUrl: "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=400", explanation: "White là màu trắng.", hint: "Màu của tuyết hoặc sữa." },
+            { id: 77, type: 'FILL_IN_BLANK', questionText: "I have two e_ _ _ . (Đôi mắt)", correctAnswer: "eyes", imageUrl: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400", explanation: "Eyes là đôi mắt.", hint: "Bé dùng để nhìn mọi thứ." },
+            { id: 78, type: 'REARRANGE', questionText: "Sắp xếp: CÁNH TAY", rearrangeParts: ["A", "R", "M"], correctAnswer: "ARM", imageUrl: "https://images.unsplash.com/photo-1511895426328-dc8714191300?w=400", explanation: "Arm là cánh tay.", hint: "Bắt đầu bằng chữ A." },
+            { id: 79, type: 'MULTIPLE_CHOICE', questionText: "Số 9 là gì?", options: ["Seven", "Eight", "Nine", "Ten"], correctAnswer: "Nine", imageUrl: "https://images.unsplash.com/photo-1599508704512-2f19fe912053?w=400", explanation: "Nine là 9.", hint: "Trước số 10." },
+            { id: 80, type: 'FILL_IN_BLANK', questionText: "A brown d_ _ . (Con chó)", correctAnswer: "dog", imageUrl: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=400", explanation: "Dog là con chó.", hint: "Kêu 'Gâu Gâu'." },
+            { id: 81, type: 'REARRANGE', questionText: "Sắp xếp: BÚT CHÌ", rearrangeParts: ["P", "E", "N", "C", "I", "L"], correctAnswer: "PENCIL", imageUrl: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=400", explanation: "Pencil là bút chì.", hint: "Bé dùng để vẽ tranh." },
+            { id: 82, type: 'MULTIPLE_CHOICE', questionText: "Quả cam là gì?", options: ["Orange", "Lemon", "Apple", "Grape"], correctAnswer: "Orange", imageUrl: "https://images.unsplash.com/photo-1547517023-7ca0c162f816?w=400", explanation: "Orange là cam.", hint: "Quả có nhiều nước và màu cam." },
+            { id: 83, type: 'FILL_IN_BLANK', questionText: "The c_ _ is meowing.", correctAnswer: "cat", imageUrl: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400", explanation: "Cat là con mèo.", hint: "Meo meo!" },
+            { id: 84, type: 'REARRANGE', questionText: "Sắp xếp: CON NGỰA", rearrangeParts: ["H", "O", "R", "S", "E"], correctAnswer: "HORSE", imageUrl: "https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=400", explanation: "Horse là con ngựa.", hint: "Chạy rất nhanh trên đồng cỏ." },
+            { id: 85, type: 'MULTIPLE_CHOICE', questionText: "Số 6 là gì?", options: ["Five", "Six", "Seven", "Eight"], correctAnswer: "Six", imageUrl: "https://images.unsplash.com/photo-1599508704512-2f19fe912053?w=400", explanation: "Six là 6.", hint: "S-I-X." },
+            { id: 86, type: 'FILL_IN_BLANK', questionText: "Wash your l_ _ _ . (Đôi chân)", correctAnswer: "legs", imageUrl: "https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=400", explanation: "Legs là đôi chân.", hint: "Dùng để đi và chạy." },
+            { id: 87, type: 'REARRANGE', questionText: "Sắp xếp: CÁI GIƯỜNG", rearrangeParts: ["B", "E", "D"], correctAnswer: "BED", imageUrl: "https://images.unsplash.com/photo-1505691938895-1758d7eaa511?w=400", explanation: "Bed là cái giường.", hint: "Nơi bé ngủ mỗi tối." },
+            { id: 88, type: 'MULTIPLE_CHOICE', questionText: "Màu đen là gì?", options: ["White", "Black", "Pink", "Blue"], correctAnswer: "Black", imageUrl: "https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=400", explanation: "Black là màu đen.", hint: "Màu của bóng đêm." },
+            { id: 89, type: 'FILL_IN_BLANK', questionText: "A small b_ _ . (Con ong)", correctAnswer: "bee", imageUrl: "https://images.unsplash.com/photo-1473116763249-2faaef81ccda?w=400", explanation: "Bee là con ong.", hint: "B-E-E." },
+            { id: 90, type: 'REARRANGE', questionText: "Sắp xếp: TRƯỜNG HỌC", rearrangeParts: ["S", "C", "H", "O", "O", "L"], correctAnswer: "SCHOOL", imageUrl: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=400", explanation: "School là trường học.", hint: "Nơi bé gặp thầy cô và bạn bè." },
+            { id: 91, type: 'MULTIPLE_CHOICE', questionText: "Số 4 là gì?", options: ["One", "Two", "Three", "Four"], correctAnswer: "Four", imageUrl: "https://images.unsplash.com/photo-1599508704512-2f19fe912053?w=400", explanation: "Four là 4.", hint: "F-O-U-R." },
+            { id: 92, type: 'FILL_IN_BLANK', questionText: "Eat an a_ _ _ _ . (Quả táo)", correctAnswer: "apple", imageUrl: "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?w=400", explanation: "Apple là quả táo.", hint: "Bắt đầu bằng A." },
+            { id: 93, type: 'REARRANGE', questionText: "Sắp xếp: KẸO", rearrangeParts: ["C", "A", "N", "D", "Y"], correctAnswer: "CANDY", imageUrl: "https://images.unsplash.com/photo-1581798459219-318e76aecc7b?w=400", explanation: "Candy là kẹo.", hint: "Vị rất ngọt bé thích." },
+            { id: 94, type: 'MULTIPLE_CHOICE', questionText: "Chị/Em gái là gì?", options: ["Sister", "Brother", "Mother", "Father"], correctAnswer: "Sister", imageUrl: "https://images.unsplash.com/photo-1511895426328-dc8714191300?w=400", explanation: "Sister là chị em gái.", hint: "Bắt đầu bằng S." },
+            { id: 95, type: 'FILL_IN_BLANK', questionText: "A tall g_ _ _ _ _ _ . (Hươu cao cổ)", correctAnswer: "giraffe", imageUrl: "https://images.unsplash.com/photo-1501032359160-5d8cdec44f77?w=400", explanation: "Giraffe là hươu cao cổ.", hint: "Có cái cổ rất dài." },
+            { id: 96, type: 'REARRANGE', questionText: "Sắp xếp: CÁI MŨ", rearrangeParts: ["H", "A", "T"], correctAnswer: "HAT", imageUrl: "https://images.unsplash.com/photo-1521369909029-2afed882baee?w=400", explanation: "Hat là cái mũ.", hint: "Đội lên đầu." },
+            { id: 97, type: 'MULTIPLE_CHOICE', questionText: "Số 0 là gì?", options: ["One", "Zero", "Two", "Ten"], correctAnswer: "Zero", imageUrl: "https://images.unsplash.com/photo-1599508704512-2f19fe912053?w=400", explanation: "Zero là 0.", hint: "Tròn trịa như quả trứng." },
+            { id: 98, type: 'FILL_IN_BLANK', questionText: "The s_ _ is blue.", correctAnswer: "sky", imageUrl: "https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?w=400", explanation: "Sky là bầu trời.", hint: "S-K-Y." },
+            { id: 99, type: 'REARRANGE', questionText: "Sắp xếp: CON KHỈ", rearrangeParts: ["M", "O", "N", "K", "E", "Y"], correctAnswer: "MONKEY", imageUrl: "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?w=400", explanation: "Monkey là con khỉ.", hint: "M-O-N-K-E-Y." },
+            { id: 100, type: 'MULTIPLE_CHOICE', questionText: "Chọn: CIRCLE (Hình tròn)", options: ["Circle", "Square", "Triangle", "Star"], correctAnswer: "Circle", imageUrl: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=400", explanation: "Circle là hình tròn.", hint: "Tròn như cái bánh vòng." }
+        ];
+
+        // --- UI COMPONENTS ---
+
+        const Button = ({ children, variant = 'primary', size = 'md', className = '', ...props }) => {
+            const baseStyles = "inline-flex items-center justify-center font-bold transition-all duration-200 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transform active:scale-95";
+            const variants = {
+                primary: "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/30",
+                secondary: "bg-emerald-500 hover:bg-emerald-600 text-white",
+                danger: "bg-rose-500 hover:bg-rose-600 text-white",
+                outline: "bg-white border-2 border-slate-300 text-slate-600 hover:border-blue-500 hover:text-blue-600"
+            };
+            const sizes = { sm: "px-4 py-1.5 text-sm", md: "px-6 py-3 text-base", lg: "px-8 py-4 text-lg" };
+            return <button className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`} {...props}>{children}</button>;
+        };
+
+        const AudioPlayer = ({ textToSpeak }) => {
+            const [isPlaying, setIsPlaying] = useState(false);
+            const speak = () => {
+                if (!window.speechSynthesis) return;
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(textToSpeak);
+                u.lang = 'en-US'; u.rate = 0.8; u.pitch = 1.1;
+                u.onstart = () => setIsPlaying(true);
+                u.onend = () => setIsPlaying(false);
+                u.onerror = () => setIsPlaying(false);
+                window.speechSynthesis.speak(u);
+            };
+            return (
+                <div className="flex items-center gap-3 bg-blue-50 p-4 rounded-2xl border-2 border-blue-100 shadow-sm transition-all hover:shadow-md">
+                    <button onClick={speak} className={`w-12 h-12 flex items-center justify-center rounded-full text-white shadow-lg ${isPlaying ? 'bg-rose-500 animate-pulse' : 'bg-blue-600 hover:bg-blue-700'}`}>
+                        {isPlaying ? "||" : "▶"}
+                    </button>
+                    <div className="flex flex-col">
+                        <span className="text-xs font-black text-blue-400 uppercase tracking-widest">Âm thanh</span>
+                        <span className="text-sm font-bold text-blue-700">Nghe cô giáo đọc</span>
+                    </div>
+                </div>
+            );
+        };
+
+        const QuestionCard = ({ question, onAnswer, isAnswered, userAnswer }) => {
+            const [inputVal, setInputVal] = useState('');
+            const [jumbled, setJumbled] = useState([]);
+            const [selected, setSelected] = useState([]);
+            const [hint, setHint] = useState(false);
+
+            useEffect(() => {
+                setInputVal(''); setSelected([]); setHint(false);
+                if (question.type === 'REARRANGE' && question.rearrangeParts) {
+                    setJumbled([...question.rearrangeParts].sort(() => Math.random() - 0.5));
+                }
+            }, [question.id]);
+
+            const normalize = (s) => s ? s.normalize('NFC').replace(/[.,!?;:'"]/g, '').replace(/\s+/g, '').trim().toLowerCase() : "";
+            const isCorrect = userAnswer && normalize(userAnswer) === normalize(question.correctAnswer);
+
+            const handlePart = (p, i) => {
+                if (isAnswered) return;
+                const id = `${p}-${i}`;
+                if (selected.includes(id)) setSelected(prev => prev.filter(x => x !== id));
+                else setSelected(prev => [...prev, id]);
+            };
+
+            const submitRearrange = () => {
+                const isSingle = !question.correctAnswer.includes(' ');
+                onAnswer(selected.map(x => x.split('-')[0]).join(isSingle ? '' : ' '));
+            };
+
+            return (
+                <div className="w-full max-w-3xl animate-fade-in bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100 mx-auto relative z-10">
+                    <div className="bg-slate-50 px-6 py-4 flex justify-between items-center border-b">
+                        <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-black uppercase tracking-wider">{question.type}</span>
+                        {!isAnswered && <button onClick={() => setHint(!hint)} className="text-amber-600 text-xs font-bold border border-amber-200 px-3 py-1 rounded-full hover:bg-amber-50">{hint ? "Ẩn gợi ý" : "Gợi ý 💡"}</button>}
+                    </div>
+                    <div className="p-6 sm:p-10">
+                        {question.imageUrl && <div className="flex justify-center bg-slate-50 p-4 rounded-2xl mb-6 shadow-inner"><img src={question.imageUrl} className="max-h-56 object-contain rounded-xl" alt="Hint" /></div>}
+                        {question.questionText.toLowerCase().includes('nghe') && <AudioPlayer textToSpeak={question.correctAnswer} />}
+                        {hint && !isAnswered && <div className="mt-4 p-4 bg-amber-50 rounded-xl border border-amber-200 text-sm text-amber-900 animate-slide-up font-bold">💡 Cô giáo dặn: {question.hint}</div>}
+                        <h2 className="text-xl sm:text-2xl font-black text-slate-800 my-6 leading-tight">{question.questionText}</h2>
+
+                        {question.type === 'MULTIPLE_CHOICE' && (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {question.options?.map((opt, idx) => (
+                                    <button key={idx} onClick={() => !isAnswered && onAnswer(opt)} disabled={isAnswered} className={`p-5 rounded-2xl text-left border-4 transition-all ${isAnswered ? (normalize(opt) === normalize(question.correctAnswer) ? 'bg-green-100 border-green-500' : normalize(opt) === normalize(userAnswer || "") ? 'bg-red-100 border-red-500' : 'opacity-60 grayscale') : 'bg-white border-slate-100 hover:border-blue-400 hover:shadow-lg'}`}>
+                                        <span className="font-black text-xl">{String.fromCharCode(65 + idx)}. {opt}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        {question.type === 'FILL_IN_BLANK' && (
+                            <div className="flex gap-2">
+                                <input type="text" value={isAnswered ? userAnswer : inputVal} onChange={e => setInputVal(e.target.value)} disabled={isAnswered} className={`flex-1 p-5 rounded-2xl border-4 text-2xl font-bold uppercase text-center outline-none ${isAnswered ? (isCorrect ? 'border-green-500 bg-green-50' : 'border-red-500 bg-red-50') : 'border-slate-100 focus:border-blue-500'}`} placeholder="..." />
+                                {!isAnswered && <Button onClick={() => inputVal.trim() && onAnswer(inputVal)}>Gửi</Button>}
+                            </div>
+                        )}
+
+                        {question.type === 'REARRANGE' && (
+                            <div className="space-y-6">
+                                <div className="flex flex-wrap justify-center gap-3 p-4 bg-slate-50 rounded-2xl border-2 border-dashed">
+                                    {jumbled.map((p, i) => !selected.includes(`${p}-${i}`) && <button key={`${p}-${i}`} onClick={() => handlePart(p, i)} className="min-w-[3rem] h-12 bg-white border-2 rounded-xl font-black text-xl text-blue-600 shadow-sm">{p}</button>)}
+                                </div>
+                                <div className={`min-h-[70px] p-4 rounded-2xl border-4 border-dashed flex flex-wrap justify-center gap-2 items-center ${isAnswered ? (isCorrect ? 'border-green-500 bg-green-50' : 'border-red-500 bg-red-50') : 'border-blue-100 bg-blue-50/20'}`}>
+                                    {selected.map((s, idx) => <button key={idx} onClick={() => handlePart(s.split('-')[0], parseInt(s.split('-')[1]))} disabled={isAnswered} className="px-4 h-12 bg-blue-600 text-white rounded-xl font-black text-xl animate-bounce-short shadow-md">{s.split('-')[0]}</button>)}
+                                </div>
+                                {!isAnswered && <Button onClick={submitRearrange} disabled={!selected.length} className="w-full">Xác nhận</Button>}
+                            </div>
+                        )}
+
+                        {isAnswered && (
+                            <div className={`mt-8 p-6 rounded-2xl border-4 shadow-lg ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                                <h3 className="font-black text-xl mb-2">{isCorrect ? 'TUYỆT VỜI!' : 'BÉ THỬ LẠI NHÉ!'}</h3>
+                                {!isCorrect && <div className="mb-2"><span className="text-sm font-bold opacity-70">Đáp án: </span><span className="font-black text-2xl uppercase tracking-widest">{question.correctAnswer}</span></div>}
+                                <p className="text-sm font-medium italic">"{question.explanation}"</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [state, setState] = useState('START');
+            const [name, setName] = useState('');
+            const [idx, setIdx] = useState(0);
+            const [ans, setAns] = useState([]);
+            const [grid, setGrid] = useState(false);
+
+            const start = () => { if(name.trim()) { setAns([]); setIdx(0); setState('PLAYING'); } };
+            const onAns = (r) => {
+                const q = QUIZ_DATA[idx];
+                const correct = r.normalize('NFC').replace(/\s+/g, '').toLowerCase() === q.correctAnswer.normalize('NFC').replace(/\s+/g, '').toLowerCase();
+                setAns(prev => [...prev.filter(x => x.questionId !== q.id), { questionId: q.id, userResponse: r, isCorrect: correct }]);
+            };
+
+            if (state === 'START') return (
+                <div className="min-h-screen flex items-center justify-center bg-blue-600 p-4 relative overflow-hidden">
+                    {[...Array(10)].map((_, i) => <div key={i} className="bubble" style={{ left: `${Math.random() * 100}%`, width: `${20+Math.random()*40}px`, height: `${20+Math.random()*40}px`, animationDelay: `${Math.random()*10}s` }}></div>)}
+                    <div className="bg-white rounded-[3rem] p-10 max-w-md w-full text-center shadow-2xl border-8 border-white/20 animate-slide-up relative z-10">
+                        <div className="w-24 h-24 bg-blue-100 text-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-6 text-3xl font-black italic shadow-inner rotate-3">IOE</div>
+                        <h1 className="text-3xl font-black mb-6">LUYỆN THI LỚP 1<br/><span className="text-blue-600">ĐỀ SỐ 01</span></h1>
+                        <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Tên bé yêu..." className="w-full px-6 py-4 rounded-2xl border-2 mb-6 text-center font-bold text-xl outline-none focus:border-blue-500" />
+                        <Button onClick={start} size="lg" className="w-full py-6 text-2xl shadow-xl shadow-blue-200" disabled={!name}>BẮT ĐẦU 🚀</Button>
+                    </div>
+                </div>
+            );
+
+            if (state === 'FINISHED') return (
+                <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+                    <div className="bg-white rounded-[3rem] p-10 max-w-2xl w-full text-center shadow-2xl animate-fade-in border-4 border-slate-100">
+                        <h2 className="text-3xl font-black mb-4">KẾT QUẢ CỦA BÉ</h2>
+                        <div className="text-7xl font-black text-blue-600 mb-8">{ans.filter(x => x.isCorrect).length * 10} <span className="text-2xl text-slate-400">điểm</span></div>
+                        <div className="grid grid-cols-2 gap-4 mb-8">
+                            <div className="bg-green-50 p-6 rounded-2xl border-2 border-green-100"><div className="text-4xl font-black text-green-600">{ans.filter(x => x.isCorrect).length}</div><div className="text-xs font-black uppercase text-green-400">Đúng</div></div>
+                            <div className="bg-red-50 p-6 rounded-2xl border-2 border-red-100"><div className="text-4xl font-black text-red-600">{QUIZ_DATA.length - ans.filter(x => x.isCorrect).length}</div><div className="text-xs font-black uppercase text-red-400">Chưa đúng</div></div>
+                        </div>
+                        <div className="flex gap-4">
+                            <Button onClick={() => setState('START')} className="flex-1 py-4 text-xl">Làm lại</Button>
+                            <Button variant="outline" onClick={() => window.location.reload()} className="flex-1">Thoát</Button>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const q = QUIZ_DATA[idx];
+            const userA = ans.find(x => x.questionId === q.id);
+            const isAns = !!userA;
+
+            return (
+                <div className="min-h-screen bg-slate-100 p-4 pb-32 flex flex-col items-center">
+                    <div className="w-full max-w-3xl flex justify-between items-center mb-6 bg-white p-4 rounded-3xl shadow-sm border border-slate-100 relative z-20">
+                        <div className="flex flex-col"><span className="text-[10px] font-black uppercase text-slate-400">Bé yêu</span><span className="font-black text-slate-700">{name}</span></div>
+                        <button onClick={() => setGrid(true)} className="px-5 py-2 bg-slate-100 hover:bg-slate-200 rounded-2xl font-black text-sm text-slate-500 transition-colors">Danh sách</button>
+                        <div className="flex flex-col items-end"><span className="text-[10px] font-black uppercase text-slate-400">Câu số</span><span className="font-black text-blue-600">{idx + 1} / {QUIZ_DATA.length}</span></div>
+                    </div>
+                    
+                    <QuestionCard question={q} onAnswer={onAns} isAnswered={isAns} userAnswer={userA?.userResponse} />
+
+                    <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t shadow-lg z-30 flex justify-center">
+                        <div className="w-full max-w-3xl mx-auto flex gap-4">
+                            <Button variant="outline" onClick={() => setIdx(i => Math.max(0, i-1))} disabled={idx === 0} className="w-24">Trước</Button>
+                            {isAns ? (
+                                idx === QUIZ_DATA.length - 1 ? <Button variant="secondary" onClick={() => setState('FINISHED')} className="flex-1">Kết thúc bài thi</Button> : <Button onClick={() => setIdx(i => i + 1)} className="flex-1">Câu tiếp theo →</Button>
+                            ) : <Button variant="outline" onClick={() => setIdx(i => Math.min(QUIZ_DATA.length-1, i+1))} className="flex-1">Bỏ qua</Button>}
+                            <Button variant="outline" onClick={() => setIdx(i => Math.min(QUIZ_DATA.length-1, i+1))} disabled={idx === QUIZ_DATA.length-1} className="w-24">Sau</Button>
+                        </div>
+                    </div>
+
+                    {grid && (
+                        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 p-4 flex items-center justify-center animate-fade-in">
+                            <div className="bg-white rounded-[2.5rem] max-w-3xl w-full p-8 shadow-2xl animate-slide-up max-h-[85vh] overflow-y-auto custom-scrollbar">
+                                <div className="flex justify-between items-center mb-8">
+                                    <h3 className="font-black text-2xl">Bảng câu hỏi</h3>
+                                    <button onClick={() => setGrid(false)} className="w-10 h-10 flex items-center justify-center bg-slate-100 rounded-full hover:bg-slate-200 transition-colors">✕</button>
+                                </div>
+                                <div className="grid grid-cols-5 sm:grid-cols-10 gap-3">
+                                    {QUIZ_DATA.map((_, i) => {
+                                        const a = ans.find(x => x.questionId === QUIZ_DATA[i].id);
+                                        return <button key={i} onClick={() => { setIdx(i); setGrid(false); }} className={`h-12 rounded-xl font-black border-2 transition-all ${idx === i ? 'border-blue-500 bg-blue-50 text-blue-600' : a ? (a.isCorrect ? 'bg-green-500 text-white border-green-600' : 'bg-red-500 text-white border-red-600') : 'bg-slate-50 border-transparent text-slate-400'}`}>{i+1}</button>
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
